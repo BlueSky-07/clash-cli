@@ -1,20 +1,9 @@
 #!/bin/bash
-CLASH_CONFIG_DIR="$HOME/.config/clash"
-CLASH_CLI_DIR="$HOME/.clash-cli"
-CLASH_CLI_CONFIGS_DIR="$HOME/.clash-cli/configs"
-CLASH_BIN="$CLASH_CLI_DIR/clash"
+source "$HOME/.clash-cli/bootstrap.sh"
 
-VERBOSE=false
+echo "[$(date '+%Y/%m/%d %H:%M:%S')] $@" >> "$CLASH_CLI_LOGS_DIR/history.log"
 
-mkdir -p "$CLASH_CLI_CONFIGS_DIR"
-
-if [ ! -f "$CLASH_BIN" ]
-then
-  echo "clash not found"
-  echo "download latest clash from https://github.com/Dreamacro/clash/releases"
-  echo "unpack bin from zip/tar, copy to $CLASH_BIN"
-  exit 1
-fi
+export VERBOSE=false
 
 clash_cli__restart() {
   local STORE_FILE_PATH="$CLASH_CLI_CONFIGS_DIR/LAST_RESTART_MANAGER"
@@ -47,7 +36,8 @@ clash_cli__restart() {
 
   local exit_code=0
   case $manager in
-    screen)
+    "screen")
+      dependency_check screen "https://www.gnu.org/software/screen/"
       local last="$(screen -ls | grep clash | awk '{$1=$1};1')"
       if [ ! -z "$last" ]
       then
@@ -66,7 +56,7 @@ clash_cli__restart() {
         fi
       fi
       ;;
-    systemctl)
+    "systemctl")
       sudo systemctl restart clash
       exit_code=$?
       ;;
@@ -134,21 +124,16 @@ clash_cli__use_config_file() {
   clash_cli__restart
 }
 
-clash_cli__version() {
-  echo "Clash Command-Line Interface v0.1 @BlueSky-07"
-  echo "visit https://github.com/BlueSky-07/clash-cli for more information"
-  echo ""
-  $CLASH_BIN -v
-}
-
 clash_cli__help() {
-  echo "ussage  : clash-cli {command} {?arguments} {?--verbose|-v}"
+  echo "ussage: clash-cli {?plugin} {command} {?arguments} {?--verbose|-v}"
   echo "commands:"
   echo "    restart {?screen|systemctl} : restart clash"
   echo "    scan                        : scan clash config files"
   echo "    use     {config_filename}   : use specific config file"
   echo "    help                        : show help info"
   echo "    version                     : show version info"
+  echo "plugins:"
+  echo "    install-clash               : install clash"
 }
 
 clash_cli() {
@@ -160,20 +145,26 @@ clash_cli() {
 
   local command="$1"
   case $command in
-    restart)
+    "restart")
       clash_cli__restart ${@:2}
       ;;
-    scan)
+    "scan")
       clash_cli__scan_config_files ${@:2}
       ;;
-    use)
+    "use")
       clash_cli__use_config_file ${@:2}
       ;;
-    help)
+    "help")
       clash_cli__help
       ;;
-    version)
-      clash_cli__version
+    "version")
+      print_version
+      ;;
+    "github")
+      $PLUGIN_GITHUB_SH ${@:2}
+      ;;
+    "install-clash")
+      $PLUGIN_INSTALL_CLASH_SH ${@:2}
       ;;
     *)
       echo "command \"$command\" not found"
@@ -184,7 +175,7 @@ clash_cli() {
 }
 
 arguments=()
-for arg in $@
+for arg in "$@"
 do
   if [[ "$arg" =~ ^-+(verbose|v)$ ]]
   then
