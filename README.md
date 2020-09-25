@@ -1,6 +1,10 @@
-# Clash Command-Line Interface
+<h1 align="center">
+  <img src="https://github.com/BlueSky-07/clash-cli/raw/master/logo.png" alt="Clash" width="200">
+  <br>Clash-CLI<br>
+</h1>
 
-v0.2 2020/08/28
+<h4 align="center">A Command-Line Interface for Clash.</h4>
+<h6 align="center">v0.2 2020/08/28</h4>
 
 # Features
 
