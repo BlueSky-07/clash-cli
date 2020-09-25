@@ -9,7 +9,7 @@
 **command**:  *ANY*
 
 
-clash not found, you should download latest clash from [https://github.com/Dreamacro/clash/releases](https://github.com/Dreamacro/clash/releases), and unpack bin from zip/tar, copy to `$HOME/.config/clash`
+clash not found, you should download latest clash from [https://github.com/Dreamacro/clash/releases](https://github.com/Dreamacro/clash/releases), and unpack bin from zip/tar, copy to `~/.clash-cli/clash`
 
 ## `2`
 
