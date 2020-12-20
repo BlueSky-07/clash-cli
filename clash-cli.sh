@@ -4,8 +4,11 @@ source "$HOME/.clash-cli/bootstrap.sh"
 echo "[$(date '+%Y/%m/%d %H:%M:%S')] $@" >> "$CLASH_CLI_LOGS_DIR/history.log"
 
 export VERBOSE=false
+export YES=false
 
 clash_cli__restart() {
+  check_bin
+
   local STORE_FILE_PATH="$CLASH_CLI_CONFIGS_DIR/LAST_RESTART_MANAGER"
 
   local manager="$1"
@@ -105,7 +108,7 @@ clash_cli__use_config_file() {
   local input="$1"
   if [ -z "$input" ]
   then
-    echo "ussage: clash-cli use {config_filename}"
+    echo "ussage: clash-cli config {config_filename}"
     echo "config files:"
     clash_cli__scan_config_files
     exit 31
@@ -128,12 +131,12 @@ clash_cli__help() {
   echo "ussage: clash-cli {?plugin} {command} {?arguments} {?--verbose|-v}"
   echo "commands:"
   echo "    restart {?screen|systemctl} : restart clash"
-  echo "    scan                        : scan clash config files"
-  echo "    use     {config_filename}   : use specific config file"
+  echo "    configs                     : scan clash config files"
+  echo "    config  {config_filename}   : use specific config file"
   echo "    help                        : show help info"
   echo "    version                     : show version info"
   echo "plugins:"
-  echo "    install-clash               : install clash"
+  echo "    install                     : install clash"
 }
 
 clash_cli() {
@@ -148,10 +151,10 @@ clash_cli() {
     "restart")
       clash_cli__restart ${@:2}
       ;;
-    "scan")
+    "configs")
       clash_cli__scan_config_files ${@:2}
       ;;
-    "use")
+    "config")
       clash_cli__use_config_file ${@:2}
       ;;
     "help")
@@ -163,7 +166,7 @@ clash_cli() {
     "github")
       $PLUGIN_GITHUB_SH ${@:2}
       ;;
-    "install-clash")
+    "install")
       $PLUGIN_INSTALL_CLASH_SH ${@:2}
       ;;
     *)
@@ -180,6 +183,9 @@ do
   if [[ "$arg" =~ ^-+(verbose|v)$ ]]
   then
     VERBOSE=true
+  elif [[ "$arg" =~ ^-+(yes|y)$ ]]
+  then
+    YES=true
   else
     arguments+=("$arg")
   fi

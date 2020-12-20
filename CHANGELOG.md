@@ -1,4 +1,14 @@
 # Clash Command-Line Interface ChangeLog
+## v0.3 2020/12/20
+
+1. commands updated:
+    - `configs`               : renamed from `scan`
+    - `config`                : renamed from `use`
+1. plugins updated:
+    - `install`               : install clash bin
+    - `install {?command}`    : renamed to `install-cli`
+1. error codes added:
+    - `41`: cannot auto get bin asset url
 
 ## v0.2 2020/08/28
 

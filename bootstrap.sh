@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Version
-MAIN_VERSION="v0.2"
+MAIN_VERSION="v0.3"
 PLUGIN_GITHUB_VERSION="v0.1"
-PLUGIN_INSTALL_CLASH_VERSION="v0.1"
+PLUGIN_INSTALL_CLASH_VERSION="v0.2"
 PLUGIN_INSTALL_CLASH_CLI_VERSION="v0.1"
 
 # Directory
@@ -27,14 +27,15 @@ mkdir -p "$CLASH_CLI_CONFIGS_DIR"
 mkdir -p "$CLASH_CLI_ASSETS_DIR"
 mkdir -p "$CLASH_CLI_CACHES_DIR"
 
-# Check Bin
-if [ ! -f "$CLASH_BIN" ]
-then
-  echo "clash not found"
-  echo "download latest clash from https://github.com/Dreamacro/clash/releases"
-  echo "unpack bin from zip/tar, copy to $CLASH_BIN"
-  exit 1
-fi
+check_bin() {
+  if [ ! -f "$CLASH_BIN" ]
+  then
+    echo "clash not found"
+    echo "download latest clash from https://github.com/Dreamacro/clash/releases"
+    echo "unpack bin from zip/tar, copy to $CLASH_BIN"
+    exit 1
+  fi
+}
 
 dependency_check() {
   local dependency=$1
@@ -43,7 +44,7 @@ dependency_check() {
     echo "missing dependency: $dependency"
     case $(uname) in
     "Linux")
-      echo "try apt-get/dnf/zypper/pacman install $dependency"
+      echo "try apt(-get)/dnf/zypper/pacman install $dependency"
       ;;
     "Darwin")
       echo "try brew/port install $dependency"

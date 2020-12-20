@@ -57,6 +57,16 @@ failed to restart clash, check your config file: `~/.config/clash/config.yaml`, 
 
 **plugin**:   *NONE*
 
-**command**:  `clash-cli use {config_filename}`
+**command**:  `clash-cli config {config_filename}`
 
 `$config_filename` is a required argument
+
+## `41`
+
+**location**: `plugins/install-clash.sh`
+
+**plugin**:   `install-clash`
+
+**command**:  `clash-cli install`
+
+cannot auto get bin asset url, please download clash bin manually

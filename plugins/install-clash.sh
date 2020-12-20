@@ -8,6 +8,7 @@ ASSET_CLASH_RELEASES_JSON="$CLASH_CLI_ASSETS_DIR/clash-releases.json"
 
 dependency_check curl "https://curl.haxx.se/download.html"
 dependency_check jq   "https://stedolan.github.io/jq/download/"
+dependency_check gzip "https://www.gnu.org/software/gzip/"
 
 filename_pattern() {
   case $(uname) in
@@ -128,17 +129,66 @@ clash_cli_install_clash__asset() {
                   + "\t" + "download count: " + (.download_count | tostring) + "\n"
       ')
 
-    if $VERBOSE
+  if $VERBOSE
+  then
+    echo "$assets"
+  else
+    echo "$assets" | grep $(filename_pattern)
+  fi
+}
+
+clash_cli_install_clash__install() {
+  if [ -f "$CLASH_BIN" ]
+  then
+    echo "clash found at $CLASH_BIN"
+    echo "override? (y/n)"
+    if $YES
     then
-      echo "$assets"
+      echo "y"
     else
-      echo "$assets" | grep $(filename_pattern)
+      read -p "" confirm
+      if [[ ! $confirm == [yY] ]]
+      then
+        echo "canceled"
+        exit 0
+      fi
     fi
+  fi
+
+  local verbose=$VERBOSE
+  VERBOSE=false
+  local asset="$(clash_cli_install_clash__asset)"
+  if [ -z "$asset" ]
+  then
+    echo "cannot auto get bin asset url, please download clash bin manually"
+    exit 41
+  fi
+
+  VERBOSE=$verbose
+  if $VERBOSE
+  then
+    echo "downloading from $asset"
+  fi
+
+  local full_filename="$(basename $asset)"
+  local full_filepath="$CLASH_CLI_ASSETS_DIR/$full_filename"
+  local filename="${full_filename%.*}"
+  local filepath="$CLASH_CLI_ASSETS_DIR/$filename"
+
+  curl -L $asset -o $full_filepath
+  gzip -d $full_filepath
+  mv $filepath $CLASH_BIN
+  chmod +x $CLASH_BIN
+
+  echo "all done"
+  echo "installed at $CLASH_BIN"
+  $CLASH_BIN -v
 }
 
 clash_cli_install_clash__help() {
-  echo "clash-cli install-clash {command} {?arguments} {?--verbose|-v}"
+  echo "clash-cli install {command} {?arguments} {?--verbose|-v} {?--yes|-y}"
   echo "commands:"
+  echo "    #none            : install clash bin"
   echo "    fetch            : fetch latest clash release info"
   echo "    list {?count}    : list all versions info"
   echo "    info {?version}  : show specific or latest version detail"
@@ -150,7 +200,7 @@ clash_cli_install_clash__help() {
 clash_cli_install_clash() {
   if [ -z "$1" ]
   then
-    clash_cli_install_clash__help
+    clash_cli_install_clash__install
     return
   fi
 
