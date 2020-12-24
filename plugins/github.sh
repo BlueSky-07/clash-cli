@@ -1,5 +1,4 @@
 #!/bin/bash
-source "$HOME/.clash-cli/bootstrap.sh"
 
 URL_GITHUB_RATE_LIMIT="https://api.github.com/rate_limit"
 ASSET_GITHUB_RATE_LIMIT_JSON="$CLASH_CLI_ASSETS_DIR/github-status.json"
@@ -39,4 +38,4 @@ clash_cli_github__status() {
           '
 }
 
-clash_cli_github__status "$@"
+clash_cli_github__status $(echo "$@" | xargs)

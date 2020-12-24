@@ -1,7 +1,7 @@
 #!/bin/bash
 source "$HOME/.clash-cli/bootstrap.sh"
 
-echo "[$(date '+%Y/%m/%d %H:%M:%S')] $@" >> "$CLASH_CLI_LOGS_DIR/history.log"
+echo "[$(date '+%Y/%m/%d %H:%M:%S')] $@" >> "$CLASH_CLI_LOG"
 
 export VERBOSE=false
 export YES=false
@@ -108,12 +108,13 @@ clash_cli__use_config_file() {
   local input="$1"
   if [ -z "$input" ]
   then
-    echo "ussage: clash-cli config {config_filename}"
+    echo "ussage: clash-cli config-file {filename}"
     echo "config files:"
     clash_cli__scan_config_files
     exit 31
   fi
   local target="$(find $CLASH_CONFIG_DIR | grep $CLASH_CONFIG_DIR/$input.yaml)"
+  # todo: import config file form path
   if [ -z "$target" ]
   then
     printf "config file not found: $CLASH_CONFIG_DIR/\e[31m$input\e[0m.yaml\n"
@@ -123,20 +124,27 @@ clash_cli__use_config_file() {
   else
     printf "applying $CLASH_CONFIG_DIR/\e[31m$input\e[0m.yaml\n"
   fi
-  cp $target $CLASH_CONFIG_DIR/config.yaml
+  cp $target $CLASH_CONFIG_FILE
   clash_cli__restart
 }
 
 clash_cli__help() {
-  echo "ussage: clash-cli {?plugin} {command} {?arguments} {?--verbose|-v}"
+  echo "ussage: clash-cli {?plugin} {?command} {?arguments} {?--verbose|-v}"
   echo "commands:"
   echo "    restart {?screen|systemctl} : restart clash"
-  echo "    configs                     : scan clash config files"
-  echo "    config  {config_filename}   : use specific config file"
+  echo "    config-files                : scan clash config files"
+  echo "    config-file {filename}      : use specific config file"
   echo "    help                        : show help info"
   echo "    version                     : show version info"
   echo "plugins:"
   echo "    install                     : install clash"
+  echo "    runtime                     : runtime tools"
+  echo "quick commands for plugins:"
+  # todo: other runtime commands
+  echo "    hello                       : <runtime> show hello message"
+  echo "    logs {?level}               : <runtime> show logs"
+  echo "    traffic                     : <runtime> show traffic"
+  echo "    proxy-groups {?name}        : <runtime> show proxy groups info"
 }
 
 clash_cli() {
@@ -148,13 +156,14 @@ clash_cli() {
 
   local command="$1"
   case $command in
+    # todo: stop
     "restart")
       clash_cli__restart ${@:2}
       ;;
-    "configs")
+    "config-files")
       clash_cli__scan_config_files ${@:2}
       ;;
-    "config")
+    "config-file")
       clash_cli__use_config_file ${@:2}
       ;;
     "help")
@@ -164,10 +173,17 @@ clash_cli() {
       print_version
       ;;
     "github")
-      $PLUGIN_GITHUB_SH ${@:2}
+      source $PLUGIN_GITHUB_SH "${@:2} "
       ;;
     "install")
-      $PLUGIN_INSTALL_CLASH_SH ${@:2}
+      source $PLUGIN_INSTALL_CLASH_SH "${@:2} "
+      ;;
+    "runtime")
+      source $PLUGIN_RUNTIME_SH "${@:2} "
+      ;;
+    # todo: other runtime commands
+    "hello"|"logs"|"traffic"|"proxy-groups"|"rules")
+      source $PLUGIN_RUNTIME_SH "${@:1} "
       ;;
     *)
       echo "command \"$command\" not found"

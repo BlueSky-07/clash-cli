@@ -1,5 +1,4 @@
 #!/bin/bash
-source "$HOME/.clash-cli/bootstrap.sh"
 
 URL_CLASH_REPO="https://api.github.com/repos/Dreamacro/clash"
 URL_CLASH_REPO_RELEASES="$URL_CLASH_REPO/releases"
@@ -186,7 +185,7 @@ clash_cli_install_clash__install() {
 }
 
 clash_cli_install_clash__help() {
-  echo "clash-cli install {command} {?arguments} {?--verbose|-v} {?--yes|-y}"
+  echo "clash-cli install {?command} {?arguments} {?--verbose|-v} {?--yes|-y}"
   echo "commands:"
   echo "    #none            : install clash bin"
   echo "    fetch            : fetch latest clash release info"
@@ -232,4 +231,4 @@ clash_cli_install_clash() {
   esac
 }
 
-clash_cli_install_clash "$@"
+clash_cli_install_clash $(echo "$@" | xargs)
